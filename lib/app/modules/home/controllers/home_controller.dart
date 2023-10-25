@@ -1,23 +1,38 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:kt7_1/app/data/model/cars/cars.dart';
+import 'package:kt7_1/app/data/model/cars_resp/carsResp.dart';
 
+enum StatusData {
+  init,
+  loading,
+  succes,
+  error,
+}
 class HomeController extends GetxController {
-  //TODO: Implement HomeController
+  Dio client = Dio();
+  String url = 'https://myfakeapi.com/api/cars/';
+  
+  RxList<Cars> cars = <Cars>[].obs;
+  var status = StatusData.init.obs;
 
-  final count = 0.obs;
   @override
   void onInit() {
+    lCarsResp();
     super.onInit();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void lCarsResp() async {
+    status.value = StatusData.loading;
+    var response = await client.get(url);
+    if(response.statusCode != 200){
+      status.value = StatusData.error;
+      return;
+    }
+    status.value = StatusData.succes;
+    var responseData = CarsResp.fromJson(response.data);
+    cars.value = responseData.cars;
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
+  
 }
